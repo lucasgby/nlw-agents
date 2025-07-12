@@ -8,11 +8,14 @@ const gemini = new GoogleGenAI({
 const model = 'gemini-2.5-flash';
 
 export async function transcribeAudio(audioAsBase64: string, mimeType: string) {
+  const prompt =
+    'Transcreva o áudio para português do Brasil. Seja preciso e natural na transcrição. Mantenha a pontuação adequada e divida o texto em parágrafos quando for apropriado';
+
   const response = await gemini.models.generateContent({
     model,
     contents: [
       {
-        text: 'Transcreva o áudio para português do Brasil. Seja preciso e natural na transcrição. Mantenha a pontuação adequada e divida o texto em parágrafos quando for apropriado',
+        text: prompt,
       },
       {
         inlineData: {
@@ -82,4 +85,6 @@ export async function generateAnswer(
   if (!response.text) {
     throw new Error('Falha ao gerar resposta pelo Gemini');
   }
+
+  return response.text;
 }
