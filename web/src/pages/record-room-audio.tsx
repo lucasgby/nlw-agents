@@ -17,12 +17,17 @@ export function RecordRoomAudio() {
 
   const [isRecording, setIsRecording] = useState(false);
   const recorder = useRef<MediaRecorder | null>(null);
+  const invervalRef = useRef<NodeJS.Timeout>(null);
 
   function stopRecording() {
     setIsRecording(false);
 
     if (recorder.current && recorder.current.state !== 'inactive') {
       recorder.current.stop();
+    }
+
+    if (invervalRef.current) {
+      clearInterval(invervalRef.current);
     }
   }
 
@@ -36,8 +41,33 @@ export function RecordRoomAudio() {
       body: formData
     });
 
-    const result = await response.json();
-    console.log(result);
+    await response.json();
+    
+  }
+
+  function createRecorder(audio: MediaStream) {
+    recorder.current = new MediaRecorder(audio, {
+      mimeType: 'audio/webm',
+      audioBitsPerSecond: 64_000
+    });
+
+    recorder.current.ondataavailable = event => {
+      if (event.data.size > 0) {
+        uploadAudio(event.data)
+      }
+    }
+
+    recorder.current.onstart = () => {
+      // biome-ignore lint/suspicious/noConsole: necessário para debug
+      console.log('Gravação iniciada!')
+    }
+
+    recorder.current.onstop = () => {
+      // biome-ignore lint/suspicious/noConsole: necessário para debug
+      console.log('Gravação encerrada/pausada')
+    }
+
+    recorder.current.start();
   }
 
   async function startRecording() {
@@ -56,26 +86,13 @@ export function RecordRoomAudio() {
       }
     });
 
-    recorder.current = new MediaRecorder(audio, {
-      mimeType: 'audio/webm',
-      audioBitsPerSecond: 64_000
-    });
+    createRecorder(audio);
 
-    recorder.current.ondataavailable = event => {
-      if (event.data.size > 0) {
-        uploadAudio(event.data)
-      }
-    }
+    invervalRef.current = setInterval(() => {
+      recorder.current?.stop()
 
-    recorder.current.onstart = () => {
-      console.log('Gravação iniciada!')
-    }
-
-    recorder.current.onstop = () => {
-      console.log('Gravação encerrada/pausada')
-    }
-
-    recorder.current.start();
+      createRecorder(audio);
+    }, 5000);
   }
 
   if (!params.roomId) {
