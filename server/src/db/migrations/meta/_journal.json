@@ -8,6 +8,13 @@
       "when": 1752189171461,
       "tag": "0000_parched_slyde",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1752274250670,
+      "tag": "0001_parallel_king_bedlam",
+      "breakpoints": true
     }
   ]
 }

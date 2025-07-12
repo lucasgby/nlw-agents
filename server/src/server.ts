@@ -5,10 +5,8 @@ import {
   validatorCompiler,
   type ZodTypeProvider,
 } from 'fastify-type-provider-zod';
-
 import { env } from './env.ts';
-import { getRoomsRoute } from './http/routes/get-rooms.ts';
-import { checkHealth } from './http/routes/health.ts';
+import { registerRoutes } from './http/routes/index.ts';
 
 const app = fastify().withTypeProvider<ZodTypeProvider>();
 
@@ -19,12 +17,6 @@ app.register(fastifyCors, {
 app.setSerializerCompiler(serializerCompiler);
 app.setValidatorCompiler(validatorCompiler);
 
-app.register(
-  (apiRoutes) => {
-    apiRoutes.register(checkHealth);
-    apiRoutes.register(getRoomsRoute);
-  },
-  { prefix: '/api' }
-);
+registerRoutes(app);
 
 app.listen({ port: env.PORT });

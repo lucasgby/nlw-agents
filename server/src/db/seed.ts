@@ -13,6 +13,9 @@ await seed(db, schema).refine((fakers) => {
         description: fakers.loremIpsum(),
       },
     },
+    questions: {
+      count: 20,
+    },
   };
 });
 
